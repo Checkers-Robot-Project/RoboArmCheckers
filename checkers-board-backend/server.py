@@ -17,27 +17,20 @@ sys.path.append("/home/dara/fyp/Coding")
 from raven_checkers.engine_bridge import get_ai_move_from_camera
 from raven_checkers.util.globalconst import BLACK, WHITE
 
-# -------------------------
-# CONFIG
-# -------------------------
+
 OUT_SIZE = 1000
 MARGIN_X = 125
 MARGIN_Y = 125
 
-# robot is always BLACK in human vs robot mode
 ROBOT_PLAYER = BLACK
 
 locked_H = None
 pipeline = None
 camera_paused = False
 
-# for UI only (camera board)
 game_board = None
 
 
-# -------------------------
-# ROS BRIDGE
-# -------------------------
 class RobotBridge(Node):
     def __init__(self):
         super().__init__("robot_bridge")
@@ -55,9 +48,6 @@ class RobotBridge(Node):
         camera_paused = (msg.data == "PAUSE")
 
 
-# -------------------------
-# CAMERA
-# -------------------------
 def start_camera():
     global pipeline
     pipeline = rs.pipeline()
@@ -83,9 +73,6 @@ def reset_camera():
     start_camera()
 
 
-# -------------------------
-# BOARD DETECTION
-# -------------------------
 def detect_board(frame):
     global locked_H
 
@@ -118,9 +105,6 @@ def detect_board(frame):
     return True
 
 
-# -------------------------
-# PIECE DETECTOR
-# -------------------------
 class PieceDetector:
     def __init__(self):
         self.red_lower1 = np.array([0, 80, 60])
@@ -184,27 +168,17 @@ class PieceDetector:
 
 detector = PieceDetector()
 
-# -------------------------
-# START CAMERA
-# -------------------------
 start_camera()
 
-
-# -------------------------
-# MAIN LOOP
-# -------------------------
 async def send_board(websocket):
     global pipeline, locked_H, camera_paused, game_board
 
     try:
         while True:
-            # -------------------------
-            # HANDLE FRONTEND MESSAGES
-            # -------------------------
+
             try:
                 msg = await asyncio.wait_for(websocket.recv(), timeout=0.001)
 
-                # RESET CAMERA
                 if msg == "RESET_CAMERA":
                     reset_camera()
 
@@ -215,9 +189,8 @@ async def send_board(websocket):
                     if len(parts) == 4:
                         _, mode, player, board_json = parts
                     elif len(parts) == 3:
-                        # fallback: no player provided
                         _, mode, board_json = parts
-                        player = "black"   # default for human mode
+                        player = "black"  
                     else:
                         print("⚠ Invalid ROBOT_MOVE_REQUEST:", msg)
                         
@@ -278,9 +251,6 @@ async def send_board(websocket):
             except websockets.exceptions.ConnectionClosed:
                 break
 
-            # -------------------------
-            # CAMERA STREAM
-            # -------------------------
             if camera_paused:
                 await asyncio.sleep(0.03)
                 continue
@@ -311,17 +281,11 @@ async def send_board(websocket):
         pass
 
 
-# -------------------------
-# START SERVER
-# -------------------------
 async def main():
     async with websockets.serve(send_board, "localhost", 6789):
         await asyncio.Future()
 
 
-# -------------------------
-# RUN
-# -------------------------
 try:
     rclpy.init()
     bridge = RobotBridge()
