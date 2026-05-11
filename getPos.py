@@ -8,7 +8,7 @@ class EnterToPrintJoints(Node):
     def __init__(self):
         super().__init__("enter_to_print_joints")
 
-        self.get_logger().info("Press ENTER anytime to print current joint positions.")
+        self.get_logger().info("Press Enter")
 
         self.subscription = self.create_subscription(
             JointState,
@@ -20,12 +20,11 @@ class EnterToPrintJoints(Node):
         self.latest_msg = None
 
     def joint_callback(self, msg):
-        # Store the latest joint state message
         self.latest_msg = msg
 
     def wait_and_print(self):
         while True:
-            input()  # Wait for ENTER
+            input()  
 
             if self.latest_msg is None:
                 print("No joint data received yet...")
@@ -46,7 +45,6 @@ def main():
     node = EnterToPrintJoints()
 
     try:
-        # Spin in a separate thread so callbacks still run
         from threading import Thread
         spin_thread = Thread(target=rclpy.spin, args=(node,), daemon=True)
         spin_thread.start()
