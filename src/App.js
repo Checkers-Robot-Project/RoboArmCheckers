@@ -16,12 +16,9 @@ export default function App() {
   const lastBoardRef = useRef(null);
   const moveLockRef = useRef(false);
 
-  // Self-play state
   const selfPlayerRef = useRef("red");
 
-  // =========================================================
-  // WEBSOCKET
-  // =========================================================
+
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:6789");
     wsRef.current = ws;
@@ -31,26 +28,22 @@ export default function App() {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      // CAMERA PAUSED
       if (data?.type === "CAMERA_PAUSED") {
         setCameraPaused(true);
         return;
       }
 
-      // CAMERA RESUMED
       if (data?.type === "CAMERA_RESUMED") {
         setCameraPaused(false);
         return;
       }
 
-      // AI MOVE (robot finished)
       if (data?.type === "AI_MOVE") {
         setAIMove(data.move);
         moveLockRef.current = false;
         return;
       }
 
-      // CAMERA BOARD UPDATE
       if (Array.isArray(data)) {
         if (cameraPaused) return;
 
@@ -66,9 +59,6 @@ export default function App() {
     return () => ws.close();
   }, [mode]);
 
-  // =========================================================
-  // ONE MOVE PER CLICK
-  // =========================================================
   const doOneSelfPlayMove = () => {
     if (!wsRef.current) return;
     if (moveLockRef.current) return;
@@ -81,13 +71,10 @@ export default function App() {
       "ROBOT_MOVE_REQUEST|self|" + player + "|" + JSON.stringify(board)
     );
 
-    // Swap for next turn
     selfPlayerRef.current = player === "red" ? "yellow" : "red";
   };
 
-  // =========================================================
-  // HUMAN MODE MOVE
-  // =========================================================
+  
   const robotMove = () => {
     if (!wsRef.current) return;
     if (moveLockRef.current) return;
@@ -99,24 +86,16 @@ export default function App() {
     );
   };
 
-  // =========================================================
-  // MODE SELECT
-  // =========================================================
+
   const startMode = (selectedMode) => {
     setMode(selectedMode);
     moveLockRef.current = false;
   };
 
-  // =========================================================
-  // HOME SCREEN
-  // =========================================================
   if (!mode) {
     return <HomeScreen onSelect={startMode} />;
   }
 
-  // =========================================================
-  // UI
-  // =========================================================
   return (
     <div className="app-container">
       <div className={`board-wrapper ${cameraPaused ? "camera-paused" : ""}`}>
