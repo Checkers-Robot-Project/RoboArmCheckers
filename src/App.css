@@ -1,6 +1,4 @@
-/* --------------------------------------------------
-   GLOBAL LAYOUT
--------------------------------------------------- */
+
 body {
   justify-content: center;
   align-items: center;
@@ -13,8 +11,8 @@ body {
 
 .app-container {
   display: flex;
-  justify-content: center;   /* centers horizontally */
-  align-items: center;        /* centers vertically */
+  justify-content: center;   
+  align-items: center;        
   gap: 28px;
   width: 100%;
 height: 90vh;
@@ -22,11 +20,10 @@ height: 90vh;
 
 
 .board-wrapper {
-  margin-right: 40px; /* space before sidebar */
+  margin-right: 40px; 
 }
 
 
-/* Robot moving dim effect */
 .robot-moving .board {
   filter: grayscale(60%) brightness(0.9);
   transition: 0.3s ease;
@@ -37,18 +34,12 @@ height: 90vh;
   filter: grayscale(60%) brightness(0.9);
 }
 
-/* --------------------------------------------------
-   BOARD WRAPPER
--------------------------------------------------- */
 .board-wrapper {
   position: relative;
   overflow: hidden;
   transition: 0.3s ease;
 }
 
-/* --------------------------------------------------
-   BOARD + SQUARES
--------------------------------------------------- */
 .board {
   display: flex;
   flex-direction: column;
@@ -79,9 +70,6 @@ height: 90vh;
   background: #8b5a2b;
 }
 
-/* --------------------------------------------------
-   SQUARE LABELS
--------------------------------------------------- */
 .label {
   position: absolute;
   top: 4px;
@@ -94,9 +82,6 @@ height: 90vh;
   user-select: none;
 }
 
-/* --------------------------------------------------
-   PIECES
--------------------------------------------------- */
 .piece {
   width: 55px;
   height: 55px;
@@ -131,9 +116,7 @@ height: 90vh;
   text-shadow: 0 0 4px rgba(0,0,0,0.8);
 }
 
-/* --------------------------------------------------
-   SIDEBAR
--------------------------------------------------- */
+
 .sidebar {
   width: 260px;
   background: #ffffff;
@@ -156,9 +139,6 @@ height: 90vh;
   color: #5a4a3a;
 }
 
-/* --------------------------------------------------
-   BUTTONS
--------------------------------------------------- */
 .controls {
   display: flex;
   flex-direction: column;
