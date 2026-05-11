@@ -14,7 +14,6 @@ class MoverNode(Node):
         super().__init__("mover")
         self.get_logger().info("Mover node started.")
 
-        # Track how many kings have been taken from the side
         self.red_kings_used = 0
         self.yellow_kings_used = 0
 
@@ -46,9 +45,6 @@ class MoverNode(Node):
         time.sleep(2.2)
         self.camera_pub.publish(String(data="RESUME"))
 
-    # -----------------------------
-    # KING PLACEMENT
-    # -----------------------------
     def place_king_piece(self, square, colour):
         hover_sq = globals().get(f"{square}_hover")
         down_sq = globals().get(square)
@@ -57,7 +53,6 @@ class MoverNode(Node):
             self.get_logger().error(f"Missing board poses for {square}")
             return
 
-        # Select king source
         if colour == "red":
             if self.red_kings_used == 0:
                 king_hover = globals().get("red_king_1_hover")
@@ -66,7 +61,7 @@ class MoverNode(Node):
                 king_hover = globals().get("red_king_2_hover")
                 king_down = globals().get("red_king_2")
             self.red_kings_used += 1
-        else:  # yellow
+        else: 
             if self.yellow_kings_used == 0:
                 king_hover = globals().get("yellow_king_1_hover")
                 king_down = globals().get("yellow_king_1")
@@ -79,28 +74,20 @@ class MoverNode(Node):
             self.get_logger().error(f"Missing king poses for {colour}")
             return
 
-        # Move man off board
         self.pick(hover_sq, down_sq)
         self.place(out, out)
 
-        # Pick king from side and place on square
         self.pick(king_hover, king_down)
         self.place(hover_sq, down_sq)
 
 
-
-    # -----------------------------
-    # EXECUTE MOVE (SAFE)
-    # -----------------------------
+    
     def execute_robot_move(self, msg):
         try:
             raw = msg.data.strip()
             if not raw:
                 return
-
-            # -------------------------------------------------
-            # PROMOTION COMMAND: PLACE KING, THEN GO DEFAULT
-            # -------------------------------------------------
+                
             if raw.startswith("ROBOT_PROMOTE|"):
                 _, square, colour = raw.split("|")
                 self.get_logger().info(f"Promoting {colour} king at {square}")
@@ -110,16 +97,13 @@ class MoverNode(Node):
 
                 self.place_king_piece(square, colour)
 
-                # AFTER king is placed, NOW go to default
                 self.move_arm(default)
                 time.sleep(2.2)
 
                 self.camera_pub.publish(String(data="RESUME"))
                 return
 
-            # -------------------------------------------------
-            # NORMAL MOVE
-            # -------------------------------------------------
+
             if "|" in raw:
                 move_part, caps_part = raw.split("|", 1)
                 captured = caps_part.split(",") if caps_part else []
@@ -145,11 +129,9 @@ class MoverNode(Node):
                 self.get_logger().error("Missing pose")
                 return
 
-            # Move piece
             self.pick(hover_s, down_s)
             self.place(hover_e, down_e)
 
-            # Captures
             if captured:
                 for cap in captured:
                     hover_c = globals().get(f"{cap}_hover")
@@ -161,15 +143,12 @@ class MoverNode(Node):
                     time.sleep(0.5)
                     self.place(out, out)
 
-            # -------------------------------------------------
-            # CHECK IF THIS MOVE ENDS ON PROMOTION ROW
-            # -------------------------------------------------
-            end_row = int(end[1])  # e.g. "E8" -> 8
+
+            end_row = int(end[1]) 
             is_promotion_move = (end_row == 8 or end_row == 1)
 
             if is_promotion_move:
-                # Man just reached last row: DON'T go to default yet.
-                time.sleep(1.0)   # give camera time to settle
+                time.sleep(1.0)  
                 self.camera_pub.publish(String(data="RESUME"))
                 return
 
@@ -185,11 +164,7 @@ class MoverNode(Node):
             self.get_logger().error(f"Move failed: {e}")
 
 
-
-
-    # -----------------------------
-    # PICK / PLACE
-    # -----------------------------
+    
     def pick(self, hover, down):
         self.move_arm(hover)
         time.sleep(2.2)
@@ -217,9 +192,6 @@ class MoverNode(Node):
         time.sleep(2.2)
 
 
-    # -----------------------------
-    # LOW-LEVEL
-    # -----------------------------
     def move_arm(self, positions):
         msg = JointTrajectory()
         msg.joint_names = ["joint1", "joint2", "joint3", "joint4"]
